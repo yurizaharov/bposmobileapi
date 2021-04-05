@@ -1,17 +1,16 @@
 {
   "name": "bposmobileapi",
-  "version": "0.0.2",
+  "version": "0.0.1",
   "description": "BPOSMobileAPI",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "export LD_LIBRARY_PATH=/opt/oracle/instantclient_21_1:$LD_LIBRARY_PATH && node index.js"
+    "start": "node index.js"
   },
   "author": "Yury Zakharov",
   "license": "MIT",
   "dependencies": {
     "axios": "^0.21.1",
-    "express": "^4.17.1",
-    "oracledb": "^5.1.0"
+    "express": "^4.17.1"
   }
 }

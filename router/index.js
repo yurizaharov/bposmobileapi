@@ -1,7 +1,8 @@
 const express = require('express');
 const jsonParser = express.json();
 const router = express.Router();
-const methods = require('../functions/methods')
+const {getinitialdata} = require('../functions/methods.js')
+const {sendsmstoken} = require('../functions/methods.js')
 
 router
     .use(function timeLog(req, res, next) {
@@ -19,20 +20,12 @@ router
     })
 
     .get('/api/endpointsList/:phone', async function (req, res) {
-        let result;
-        let phone = req.params.phone;
-        if (phone.match('(7)([0-9]{10})')) {
-            phone = ['+', phone.slice(0,1), ' (', phone.slice(1,4), ') ', phone.slice(4,7), '-', phone.slice(7,9), '-', phone.slice(9,11)].join('')
-            result = await methods.getdatabaselist(phone);
-        } else {
-            result = {
-                code: 1,
-                status: "Incorrect phone number"
-            }
-        }
+        const phone = req.params.phone;
+        console.log(phone);
+        let initialData = await getinitialdata();
         res
             .status(200)
-            .send(result);
+            .send(initialData);
     })
 
     .post("/api/endpointConfirm", jsonParser, async function (req, res) {
@@ -40,7 +33,8 @@ router
         const name = req.body.name;
         const phone = req.body.phone;
 
-        let sendResult = await methods.sendsmstoken(name, phone);
+        let sendResult = await sendsmstoken(name, phone);
+        console.log(sendResult)
 
         res
             .status(200)
@@ -53,8 +47,17 @@ router
         const phone = req.body.phone;
         const smsToken = req.body.smsToken;
 
-        let resData = await methods.getpassword(name, phone, smsToken);
+        console.log(name, phone, smsToken)
 
+        const resData = {
+            "code" : 0,
+            "status" : "success",
+            "data" :
+                {
+                    "backend": "https://st-02.stage.bms.group/mobile/",
+                    "token" : "qTyM6VWqqP6Y"
+                }
+        };
         res
             .status(200)
             .send(resData);
