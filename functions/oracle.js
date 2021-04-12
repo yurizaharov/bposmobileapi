@@ -2,9 +2,9 @@ const oracledb = require('oracledb');
 
 module.exports = {
 
-    getretailpointid: async function(dataBase, phone) {
+    getretailpoints: async function(dataBase, phone) {
         let connection;
-        let sqlQuery = 'select retail_point_id from retail_points where phone = \'' + phone + '\'';
+        let sqlQuery = 'select retail_point_id, title from retail_points where phone = \'' + phone + '\'';
         try {
             let binds, options, result;
             connection = await oracledb.getConnection({
