@@ -4,7 +4,11 @@ module.exports = {
 
     getretailpoints: async function(dataBase, phone) {
         let connection;
-        let sqlQuery = 'select retail_point_id, title from retail_points where phone = \'' + phone + '\'';
+        let sqlQuery = 'SELECT rp.RETAIL_POINT_ID, rp.TITLE \n' +
+            'FROM RETAIL_POINTS rp, PAYMASTER_TOKEN pt \n' +
+            'WHERE rp.RETAIL_POINT_ID = pt.RETAIL_POINT_ID \n' +
+            'AND pt.IS_DELETE = 0 \n' +
+            'AND pt.PHONE = \'' + phone + '\'';
         try {
             let binds, options, result;
             connection = await oracledb.getConnection({
