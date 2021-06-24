@@ -24,21 +24,25 @@ module.exports = {
             let retailPoints = [];
             let sqlData = await oracle.getretailpoints(allDataBases[k], phone);
 
-            if (sqlData.length) {
-                sqlData.forEach(
-                    function readParams( currentValue ) {
-                        retailPoints.push({
-                            retailPointId : currentValue['RETAIL_POINT_ID'],
-                            title : currentValue['TITLE']
-                        });
-                    }
-                );
+            if (!sqlData) {
+                console.log('Something went wrong with', allDataBases[k].name)
+            } else {
+                if (sqlData.length) {
+                    sqlData.forEach(
+                        function readParams(currentValue) {
+                            retailPoints.push({
+                                retailPointId: currentValue['RETAIL_POINT_ID'],
+                                title: currentValue['TITLE']
+                            });
+                        }
+                    );
 
-                data.push({
-                    name : allDataBases[k].name,
-                    description : allDataBases[k].description,
-                    retailPoints : retailPoints
-                });
+                    data.push({
+                        name: allDataBases[k].name,
+                        description: allDataBases[k].description,
+                        retailPoints: retailPoints
+                    });
+                }
             }
         }
 
