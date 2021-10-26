@@ -23,7 +23,7 @@ router
         let phone = req.params.phone;
         if (phone.match('(7)([0-9]{10})')) {
 //            phone = ['+', phone.slice(0,1), ' (', phone.slice(1,4), ') ', phone.slice(4,7), '-', phone.slice(7,9), '-', phone.slice(9,11)].join('')
-            result = await methods.getdatabaselist(phone);
+            result = await methods.getDatabaseList(phone);
         } else {
             result = {
                 code: 1,
@@ -40,7 +40,7 @@ router
         const name = req.body.name;
         const phone = req.body.phone;
 
-        let sendResult = await methods.sendsmstoken(name, phone);
+        let sendResult = await methods.sendSmsToken(name, phone);
 
         res
             .status(200)
@@ -53,7 +53,7 @@ router
         const phone = req.body.phone;
         const smsToken = req.body.smsToken;
 
-        let resData = await methods.getpassword(name, phone, smsToken);
+        let resData = await methods.getPassword(name, phone, smsToken);
 
         res
             .status(200)

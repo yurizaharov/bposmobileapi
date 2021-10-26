@@ -1,18 +1,22 @@
 const axios = require('axios');
 const oracle = require('../functions/oracle')
+const functions = require('../functions/functions')
+const fs = require("fs");
 
 // Setting variables
 configServiceAddr = process.env.CONFIGSERVICE_ADDR || '192.168.4.231:20080'
 
-module.exports = {
-
-    getdatabaselist: async function(phone){
+const methods = {
+    async getDatabaseList (phone) {
         let allDataBases = [];
+        let tasksData = [];
         let response = {};
         let data = [];
+        let sqlQuery = fs.readFileSync('./sql/getretailpoints.sql').toString();
+        sqlQuery = sqlQuery.replace('phone', phone);
 
         try {
-            allDataBases = await axios.get('http://' + configServiceAddr + '/api/configs/database')
+            allDataBases = await axios.get('http://' + configServiceAddr + '/api/configs/database', { timeout : 15000 })
                 .then((response) => {
                     return response.data;
                 });
@@ -21,29 +25,39 @@ module.exports = {
         }
 
         for (let k = 0; k < allDataBases.length; k++) {
+             let dataBase = allDataBases[k].name;
+             let initialData = {
+                 'name' : dataBase,
+                 'dataBase' : dataBase,
+                 'user' : allDataBases[k].user,
+                 'password' : allDataBases[k].password,
+                 'connectString' : allDataBases[k].connectString,
+                 'sqlQuery' : sqlQuery
+             }
+             tasksData.push(initialData);
+         }
+
+        let currentPatches = await functions.parallelProcess(oracle.sqlrequest, tasksData);
+        currentPatches = currentPatches.filter(obj => obj.data.length > 0);
+
+        for (let k = 0; k < currentPatches.length; k++) {
             let retailPoints = [];
-            let sqlData = await oracle.getretailpoints(allDataBases[k], phone);
-
-            if (!sqlData) {
-                console.log('Something went wrong with', allDataBases[k].name)
-            } else {
-                if (sqlData.length) {
-                    sqlData.forEach(
-                        function readParams(currentValue) {
-                            retailPoints.push({
-                                retailPointId: currentValue['RETAIL_POINT_ID'],
-                                title: currentValue['TITLE']
-                            });
-                        }
-                    );
-
-                    data.push({
-                        name: allDataBases[k].name,
-                        description: allDataBases[k].description,
-                        retailPoints: retailPoints
+            currentPatches[k].data.forEach(
+                function readParams(currentValue) {
+                    retailPoints.push({
+                        retailPointId: currentValue['RETAIL_POINT_ID'],
+                        title: currentValue['TITLE']
                     });
                 }
-            }
+            );
+            let tempData = allDataBases.filter(obj => {
+                return obj.name === currentPatches[k].name
+            });
+            data.push({
+                name: currentPatches[k].name,
+                description: tempData[0].description,
+                retailPoints: retailPoints
+            });
         }
 
         if (data.length) {
@@ -61,10 +75,10 @@ module.exports = {
         return response;
         },
 
-    sendsmstoken: async function (name, phone) {
+     async sendSmsToken (name, phone) {
         let mobilebackConfig = [];
         try {
-            mobilebackConfig = await axios.get('http://' + configServiceAddr + '/api/configs/mobileback/' + name)
+            mobilebackConfig = await axios.get('http://' + configServiceAddr + '/api/configs/mobileback/' + name, { timeout : 15000 })
                 .then((response) => {
                     return response.data;
                 });
@@ -77,7 +91,7 @@ module.exports = {
             let sendResult = {};
             try {
                 result = await axios.post(mobilebackConfig[0].mobileExt + 'rest/phones/' + phone + '/token', null,
-                    { auth : { username: 'admin', password: mobilebackConfig[0].token } })
+                    { auth : { username: 'admin', password: mobilebackConfig[0].token }, timeout : 15000 })
                     .then((response) => {
                         return response.data;
                     });
@@ -97,13 +111,13 @@ module.exports = {
         }
     },
 
-    getpassword: async function (name, phone, smsToken) {
+    async getPassword (name, phone, smsToken) {
         let mobilebackConfig = [];
         let resData;
         let result;
 
         try {
-            mobilebackConfig = await axios.get('http://' + configServiceAddr + '/api/configs/mobileback/' + name)
+            mobilebackConfig = await axios.get('http://' + configServiceAddr + '/api/configs/mobileback/' + name, { timeout : 15000 })
                 .then((response) => {
                     return response.data;
                 });
@@ -113,7 +127,7 @@ module.exports = {
 
         try {
             result = await axios.post(mobilebackConfig[0].mobileExt + 'rest/phones/' + phone + '/approving', { code: smsToken } ,
-                { auth : { username: 'admin', password: mobilebackConfig[0].token } } )
+                { auth : { username: 'admin', password: mobilebackConfig[0].token }, timeout : 15000 })
                 .then((response) => {
                     return response.data;
                 });
@@ -147,3 +161,5 @@ module.exports = {
     }
 
 }
+
+module.exports = methods;

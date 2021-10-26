@@ -1,31 +1,23 @@
 const oracledb = require('oracledb');
 
-module.exports = {
+const oracle = {
 
-    getretailpoints: async function(dataBase, phone) {
+    async sqlrequest (initialData) {
         let connection;
-        let sqlQuery = 'SELECT rp.RETAIL_POINT_ID, rp.TITLE \n' +
-            'FROM RETAIL_POINTS rp, PAYMASTER_TOKEN pt \n' +
-            'WHERE rp.RETAIL_POINT_ID = pt.RETAIL_POINT_ID \n' +
-            'AND pt.IS_DELETE = 0 \n' +
-            'AND pt.PHONE = \'' + phone + '\'';
         try {
             let binds, options, result;
-            connection = await oracledb.getConnection({
-                user: dataBase.user,
-                password: dataBase.password,
-                connectString: dataBase.connectString
-            });
+
+            connection = await oracledb.getConnection(initialData);
 
             binds = {};
             options = {
                 outFormat: oracledb.OUT_FORMAT_OBJECT
             };
-
-            result = await connection.execute(sqlQuery, binds, options);
-
-            return result.rows;
-
+            result = await connection.execute(initialData.sqlQuery, binds, options);
+            return {
+                'name' : initialData.name,
+                'data' : result.rows
+            };
         } catch (err) {
             console.error(err);
         } finally {
@@ -38,5 +30,6 @@ module.exports = {
             }
         }
     }
-
 }
+
+module.exports = oracle;
