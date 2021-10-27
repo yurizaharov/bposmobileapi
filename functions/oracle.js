@@ -19,7 +19,12 @@ const oracle = {
                 'data' : result.rows
             };
         } catch (err) {
+            console.log('Something went wrong with', initialData.name)
             console.error(err);
+            return {
+                'name' : initialData.name,
+                'data' : []
+            }
         } finally {
             if (connection) {
                 try {
