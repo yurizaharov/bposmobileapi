@@ -1,7 +1,7 @@
 const axios = require('axios');
 const oracle = require('../functions/oracle')
 const functions = require('../functions/functions')
-const fs = require("fs");
+const fs = require('fs');
 
 // Setting variables
 configServiceAddr = process.env.CONFIGSERVICE_ADDR || '192.168.4.231:20080'
@@ -9,7 +9,6 @@ configServiceAddr = process.env.CONFIGSERVICE_ADDR || '192.168.4.231:20080'
 const methods = {
     async getDatabaseList (phone) {
         let allDataBases = [];
-        let tasksData = [];
         let response = {};
         let data = [];
         let sqlQuery = fs.readFileSync('./sql/getretailpoints.sql').toString();
@@ -24,18 +23,17 @@ const methods = {
             console.log(err)
         }
 
-        for (let k = 0; k < allDataBases.length; k++) {
-             let dataBase = allDataBases[k].name;
-             let initialData = {
-                 'name' : dataBase,
-                 'dataBase' : dataBase,
-                 'user' : allDataBases[k].user,
-                 'password' : allDataBases[k].password,
-                 'connectString' : allDataBases[k].connectString,
-                 'sqlQuery' : sqlQuery
-             }
-             tasksData.push(initialData);
-         }
+        const tasksData = allDataBases.map( db => {
+            let dataBase = db.name;
+            return {
+                'name' : dataBase,
+                'dataBase' : dataBase,
+                'user' : db.user,
+                'password' : db.password,
+                'connectString' : db.connectString,
+                'sqlQuery' : sqlQuery
+            }
+        });
 
         let currentPatches = await functions.parallelProcess(oracle.sqlrequest, tasksData);
         currentPatches = currentPatches.filter(obj => obj.data.length > 0);
@@ -113,11 +111,21 @@ const methods = {
 
     async getPassword (name, phone, smsToken) {
         let mobilebackConfig = [];
+        let bmscardwebConfig = {};
         let resData;
         let result;
 
         try {
             mobilebackConfig = await axios.get('http://' + configServiceAddr + '/api/configs/mobileback/' + name, { timeout : 15000 })
+                .then((response) => {
+                    return response.data;
+                });
+        } catch (err) {
+            console.log(err)
+        }
+
+        try {
+            bmscardwebConfig = await axios.get('http://' + configServiceAddr + '/api/configs/bmscardweb/' + name, { timeout : 15000 })
                 .then((response) => {
                     return response.data;
                 });
@@ -143,7 +151,8 @@ const methods = {
                 "data" :
                     {
                         "backend": mobilebackConfig[0].mobileExt,
-                        "token" : result.password
+                        "token" : result.password,
+                        "web" : bmscardwebConfig.bmscardweburl
                     }
             };
         } else if (result.code) {
