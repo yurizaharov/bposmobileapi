@@ -80,7 +80,7 @@ const methods = {
             let result = [];
             try {
                 result = await axios.post(mobilebackConfig.mobileExt + 'rest/phones/' + phone + '/token', null,
-                    { auth : { username: 'admin', password: mobilebackConfig.token }, timeout : 15000 })
+                    { auth : { username: 'admin', password: mobilebackConfig.mobileToken }, timeout : 15000 })
                     .then((response) => {
                         return response.data;
                     });
@@ -128,7 +128,7 @@ const methods = {
 
         try {
             result = await axios.post(mobilebackConfig.mobileExt + 'rest/phones/' + phone + '/approving', { code: smsToken } ,
-                { auth : { username: 'admin', password: mobilebackConfig.token }, timeout : 15000 })
+                { auth : { username: 'admin', password: mobilebackConfig.mobileToken }, timeout : 15000 })
                 .then((response) => {
                     return response.data;
                 });
