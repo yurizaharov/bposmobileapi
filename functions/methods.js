@@ -76,11 +76,11 @@ const methods = {
             console.log(err)
         }
 
-        if (mobilebackConfig[0].name === name) {
+        if (mobilebackConfig.name === name) {
             let result = [];
             try {
-                result = await axios.post(mobilebackConfig[0].mobileExt + 'rest/phones/' + phone + '/token', null,
-                    { auth : { username: 'admin', password: mobilebackConfig[0].token }, timeout : 15000 })
+                result = await axios.post(mobilebackConfig.mobileExt + 'rest/phones/' + phone + '/token', null,
+                    { auth : { username: 'admin', password: mobilebackConfig.token }, timeout : 15000 })
                     .then((response) => {
                         return response.data;
                     });
@@ -127,8 +127,8 @@ const methods = {
         }
 
         try {
-            result = await axios.post(mobilebackConfig[0].mobileExt + 'rest/phones/' + phone + '/approving', { code: smsToken } ,
-                { auth : { username: 'admin', password: mobilebackConfig[0].token }, timeout : 15000 })
+            result = await axios.post(mobilebackConfig.mobileExt + 'rest/phones/' + phone + '/approving', { code: smsToken } ,
+                { auth : { username: 'admin', password: mobilebackConfig.token }, timeout : 15000 })
                 .then((response) => {
                     return response.data;
                 });
@@ -143,7 +143,7 @@ const methods = {
                 "status" : "success",
                 "data" :
                     {
-                        "backend": mobilebackConfig[0].mobileExt,
+                        "backend": mobilebackConfig.mobileExt,
                         "token" : result.password,
                         "web" : bmscardwebConfig.bmscardweburl
                     }
