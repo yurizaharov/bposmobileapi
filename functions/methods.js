@@ -1,6 +1,7 @@
 const axios = require('axios');
 const oracle = require('../functions/oracle')
 const functions = require('../functions/functions')
+const responses = require('../responses');
 const fs = require('fs');
 
 // Setting variables
@@ -65,7 +66,7 @@ const methods = {
         }
         },
 
-     async sendSmsToken (name, phone) {
+    async sendSmsToken (name, phone) {
         let mobilebackConfig = [];
         try {
             mobilebackConfig = await axios.get('http://' + configServiceAddr + '/api/configs/mobileback/' + name, { timeout : 15000 })
@@ -143,7 +144,7 @@ const methods = {
                 "status" : "success",
                 "data" :
                     {
-                        "backend": mobilebackConfig.mobileExt,
+                        "backend" : mobilebackConfig.mobileExt,
                         "token" : result.password,
                         "web" : bmscardwebConfig.bmscardweburl
                     }
@@ -158,6 +159,23 @@ const methods = {
                 "code": 1,
                 "status": "Something went wrong"
             }
+        }
+    },
+
+    async getDescription (name) {
+        let result;
+        try {
+            const request = await axios.get('http://' + configServiceAddr + '/api/configs/beniobms/' + name, { timeout: 15000 });
+            result = request.data;
+        } catch (err) {
+            console.log(err)
+        }
+        if (!result.code) {
+            responses.response201.data.name = name;
+            responses.response201.data.description = result.description;
+            return responses.response201;
+        } else {
+            return result;
         }
     }
 

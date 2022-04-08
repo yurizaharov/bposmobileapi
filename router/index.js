@@ -18,6 +18,14 @@ router
             .send('BPOSMobileAPI');
     })
 
+    .get('/api/getdescription/:name', async function (req, res) {
+        const name = req.params.name;
+        let result = await methods.getDescription(name)
+        res
+            .status(200)
+            .send(result);
+    })
+
     .get('/api/endpointsList/:phone', async function (req, res) {
         let result;
         let phone = req.params.phone;
