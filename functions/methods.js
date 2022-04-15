@@ -146,7 +146,7 @@ const methods = {
                     {
                         "backend" : mobilebackConfig.mobileExt,
                         "token" : result.password,
-                        "web" : bmscardwebConfig.bmscardweburl
+                        "web" : bmscardwebConfig.bmscardwebUrl
                     }
             };
         } else if (result.code) {
