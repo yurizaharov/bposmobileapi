@@ -146,6 +146,7 @@ const methods = {
                     {
                         "backend" : mobilebackConfig.mobileExt,
                         "token" : result.password,
+                        "projectID": mobilebackConfig.projectID,
                         "web" : bmscardwebConfig.bmscardwebUrl
                     }
             };
@@ -165,7 +166,7 @@ const methods = {
     async getDescription (name) {
         let result;
         try {
-            const request = await axios.get('http://' + configServiceAddr + '/api/configs/beniobms/' + name, { timeout: 15000 });
+            const request = await axios.get('http://' + configServiceAddr + '/api/configs/getprojectid/' + name, { timeout: 15000 });
             result = request.data;
         } catch (err) {
             console.log(err)
